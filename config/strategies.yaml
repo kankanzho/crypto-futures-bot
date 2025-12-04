@@ -1,0 +1,141 @@
+# Trading Strategies Configuration
+
+# RSI Strategy
+rsi:
+  name: "RSI Strategy"
+  enabled: true
+  parameters:
+    period: 14
+    oversold: 30
+    overbought: 70
+    timeframe: "1"
+  stop_loss:
+    type: "percentage"  # percentage, atr, trailing
+    value: 0.02        # 2%
+  take_profit:
+    type: "risk_reward"
+    ratio: 2.0         # 2:1 risk/reward
+    partial_exits:
+      - level: 0.5     # 50% of position
+        ratio: 1.0     # at 1:1
+      - level: 0.5     # remaining 50%
+        ratio: 2.0     # at 2:1
+
+# MACD Strategy
+macd:
+  name: "MACD Strategy"
+  enabled: true
+  parameters:
+    fast_period: 12
+    slow_period: 26
+    signal_period: 9
+    timeframe: "3"
+  stop_loss:
+    type: "atr"
+    multiplier: 2.0
+    atr_period: 14
+  take_profit:
+    type: "multi_level"
+    levels:
+      - percentage: 0.015  # 1.5%
+        exit_size: 0.33    # 33% of position
+      - percentage: 0.025  # 2.5%
+        exit_size: 0.33    # 33% of position
+      - percentage: 0.04   # 4%
+        exit_size: 0.34    # 34% of position
+
+# Bollinger Bands Strategy
+bollinger:
+  name: "Bollinger Bands Strategy"
+  enabled: true
+  parameters:
+    period: 20
+    std_dev: 2.0
+    timeframe: "1"
+  stop_loss:
+    type: "trailing"
+    initial_stop: 0.015  # 1.5%
+    trailing_percent: 0.01  # 1% trailing
+    activation_percent: 0.01  # Activate trailing after 1% profit
+  take_profit:
+    type: "dynamic"
+    base_target: 0.025   # 2.5%
+    max_target: 0.05     # 5%
+    volatility_multiplier: 1.5
+
+# EMA Crossover Strategy
+ema_cross:
+  name: "EMA Crossover Strategy"
+  enabled: true
+  parameters:
+    fast_ema: 9
+    slow_ema: 21
+    timeframe: "3"
+    trend_ema: 50        # For trend filter on higher timeframe
+    trend_timeframe: "5"
+  stop_loss:
+    type: "percentage"
+    value: 0.02
+  take_profit:
+    type: "risk_reward"
+    ratio: 2.5
+    partial_exits:
+      - level: 0.4
+        ratio: 1.5
+      - level: 0.6
+        ratio: 2.5
+
+# Combined Strategy (multiple indicators)
+combined:
+  name: "Combined Strategy"
+  enabled: false
+  parameters:
+    # RSI component
+    rsi_period: 14
+    rsi_oversold: 35
+    rsi_overbought: 65
+    
+    # MACD component
+    macd_fast: 12
+    macd_slow: 26
+    macd_signal: 9
+    
+    # EMA component
+    ema_fast: 9
+    ema_slow: 21
+    
+    # Require multiple confirmations
+    min_confirmations: 2
+    timeframe: "1"
+    
+  stop_loss:
+    type: "atr"
+    multiplier: 2.5
+    atr_period: 14
+  take_profit:
+    type: "multi_level"
+    levels:
+      - percentage: 0.02
+        exit_size: 0.4
+      - percentage: 0.035
+        exit_size: 0.6
+
+# Backtest Settings
+backtest:
+  initial_capital: 10000
+  commission: 0.0006  # 0.06% (Bybit taker fee)
+  slippage: 0.0005    # 0.05% estimated slippage
+  
+  # Date range (leave empty for all available data)
+  start_date: ""
+  end_date: ""
+  
+  # Optimization
+  optimize: false
+  optimization_metric: "sharpe_ratio"  # sharpe_ratio, total_return, win_rate
+  
+  # Parameter ranges for optimization (example for RSI)
+  optimization_ranges:
+    rsi_period: [10, 14, 18, 21]
+    rsi_oversold: [25, 30, 35]
+    rsi_overbought: [65, 70, 75]
