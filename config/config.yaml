@@ -1,0 +1,39 @@
+auto_strategy_switching:
+  enabled: true                    # Enable automatic strategy switching
+  dry_run: true                    # Test mode - log only, don't actually switch
+  check_interval: 300              # Market analysis interval (seconds) - 5 minutes
+  min_strategy_duration: 1800      # Minimum time to keep a strategy (seconds) - 30 minutes
+  switch_cooldown: 600             # Cooldown after switching (seconds) - 10 minutes
+  close_position_before_switch: false  # Whether to close positions before switching
+  score_threshold: 70              # Minimum score to select a strategy
+  
+  # Market analysis parameters
+  market_analysis:
+    volatility_period: 14          # ATR/Bollinger Bands calculation period
+    trend_period: 14               # ADX calculation period
+    volume_period: 20              # Volume average calculation period
+    
+  # Strategy weights (preference adjustment)
+  # Higher weight = higher priority when scores are close
+  strategy_weights:
+    scalping: 1.0
+    rsi: 1.0
+    macd: 1.0
+    bollinger: 1.0
+    momentum: 1.0
+    ema_cross: 1.0
+    combined: 0.8                  # Lower priority for combined strategy
+
+# Logging configuration
+logging:
+  level: INFO                      # DEBUG, INFO, WARNING, ERROR
+  format: "[%(asctime)s] %(levelname)s - %(message)s"
+  datefmt: "%Y-%m-%d %H:%M:%S"
+  file: "logs/bot.log"             # Log file path (optional)
+  
+# Trading parameters (example - customize as needed)
+trading:
+  symbol: "BTCUSDT"
+  timeframe: "5m"                  # 1m, 5m, 15m, 1h, etc.
+  initial_capital: 10000
+  risk_per_trade: 0.02             # 2% risk per trade
