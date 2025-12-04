@@ -1,0 +1,58 @@
+coins:
+  # Layer 1 cryptocurrencies
+  - symbol: BTCUSDT
+    name: Bitcoin
+    category: layer1
+    enabled: true
+    min_order_size: 0.001
+    allocation_pct: 25
+    
+  - symbol: ETHUSDT
+    name: Ethereum
+    category: layer1
+    enabled: true
+    min_order_size: 0.01
+    allocation_pct: 25
+    
+  - symbol: SOLUSDT
+    name: Solana
+    category: layer1
+    enabled: true
+    min_order_size: 0.1
+    allocation_pct: 25
+    
+  - symbol: BNBUSDT
+    name: Binance Coin
+    category: layer1
+    enabled: true
+    min_order_size: 0.01
+    allocation_pct: 25
+
+  # Additional coins (disabled by default)
+  - symbol: AVAXUSDT
+    name: Avalanche
+    category: layer1
+    enabled: false
+    min_order_size: 0.1
+    allocation_pct: 0
+    
+  - symbol: LINKUSDT
+    name: Chainlink
+    category: defi
+    enabled: false
+    min_order_size: 0.1
+    allocation_pct: 0
+    
+  - symbol: UNIUSDT
+    name: Uniswap
+    category: defi
+    enabled: false
+    min_order_size: 0.1
+    allocation_pct: 0
+    
+  - symbol: DOGEUSDT
+    name: Dogecoin
+    category: meme
+    enabled: false
+    min_order_size: 1.0
+    allocation_pct: 0

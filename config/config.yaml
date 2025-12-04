@@ -1,0 +1,52 @@
+trading:
+  mode: testnet  # testnet or mainnet
+  leverage: 10
+  max_positions: 4
+  position_size_pct: 25  # percentage of account balance per position
+  
+risk_management:
+  stop_loss_pct: 2.0
+  take_profit_pct: 3.0
+  trailing_stop: true
+  trailing_stop_pct: 1.5
+  max_daily_loss_pct: 5.0
+  risk_per_trade_pct: 2.0
+  use_atr_stop: false
+  atr_multiplier: 2.0
+  partial_take_profit: true
+  partial_tp_pct: 50  # Take 50% profit at first target
+  risk_reward_ratio: 2.0  # 1:2 risk-reward
+
+strategies:
+  active_strategy: scalping  # scalping, rsi, macd, bollinger, momentum, ema_cross, combined
+  use_multi_timeframe: true
+  volume_filter: true
+  volatility_filter: true
+  trend_filter: true
+  min_volume_24h: 1000000  # Minimum 24h volume in USDT
+
+api:
+  rate_limit_per_minute: 100
+  websocket_reconnect: true
+  request_timeout: 10
+  max_retries: 3
+  retry_delay: 1  # seconds
+
+notification:
+  enable_sound: true
+  enable_popup: true
+  notify_on_entry: true
+  notify_on_exit: true
+  notify_on_error: true
+
+backtesting:
+  start_date: "2024-01-01"
+  end_date: "2024-12-01"
+  initial_capital: 10000  # USDT
+  commission: 0.075  # 0.075% taker fee
+  slippage: 0.05  # 0.05% slippage
+
+gui:
+  update_interval_ms: 1000  # Update GUI every 1 second
+  chart_candles: 100  # Number of candles to display
+  theme: dark  # dark or light
