@@ -254,9 +254,12 @@ class MarketAnalyzer:
         plus_di = 100 * (plus_dm.rolling(window=period).mean() / atr)
         minus_di = 100 * (minus_dm.rolling(window=period).mean() / atr)
         
-        # Calculate DX and ADX
-        dx = 100 * np.abs(plus_di - minus_di) / (plus_di + minus_di)
-        adx = dx.rolling(window=period).mean().iloc[-1]
+        # Calculate DX and ADX with zero-division protection
+        di_sum = plus_di + minus_di
+        # Avoid division by zero
+        dx = 100 * np.abs(plus_di - minus_di) / di_sum.replace(0, np.nan)
+        # Use exponential smoothing for ADX (more standard implementation)
+        adx = dx.ewm(span=period, adjust=False).mean().iloc[-1]
         
         return adx if not np.isnan(adx) else 0.0
     

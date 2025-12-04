@@ -6,6 +6,7 @@ auto_strategy_switching:
   switch_cooldown: 600             # Cooldown after switching (seconds) - 10 minutes
   close_position_before_switch: false  # Whether to close positions before switching
   score_threshold: 70              # Minimum score to select a strategy
+  max_switches_per_hour: 3         # Maximum switches allowed per hour (excessive switching protection)
   
   # Market analysis parameters
   market_analysis:

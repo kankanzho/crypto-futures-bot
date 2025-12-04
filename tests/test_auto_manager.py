@@ -9,6 +9,8 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 import json
+import tempfile
+import os
 
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -78,7 +80,8 @@ class TestAutoStrategyManager(unittest.TestCase):
                 'min_strategy_duration': 10,
                 'switch_cooldown': 5,
                 'score_threshold': 70,
-                'close_position_before_switch': False
+                'close_position_before_switch': False,
+                'max_switches_per_hour': 3
             },
             'market_analysis': {
                 'volatility_period': 14,
@@ -87,15 +90,16 @@ class TestAutoStrategyManager(unittest.TestCase):
             }
         }
         
-        # Use temporary stats file
-        self.test_stats_file = Path('/tmp/test_strategy_switches.json')
-        if self.test_stats_file.exists():
-            self.test_stats_file.unlink()
+        # Use temporary directory for stats file
+        self.temp_dir = tempfile.mkdtemp()
+        self.test_stats_file = Path(self.temp_dir) / 'test_strategy_switches.json'
     
     def tearDown(self):
         """Clean up after tests."""
-        if self.test_stats_file.exists():
-            self.test_stats_file.unlink()
+        # Clean up temporary directory
+        import shutil
+        if os.path.exists(self.temp_dir):
+            shutil.rmtree(self.temp_dir)
     
     def test_initialization(self):
         """Test AutoStrategyManager initialization."""

@@ -62,6 +62,7 @@ class AutoStrategyManager:
         self.close_position_before_switch = auto_config.get('close_position_before_switch', False)
         self.score_threshold = auto_config.get('score_threshold', 70)
         self.dry_run = auto_config.get('dry_run', False)
+        self.max_switches_per_hour = auto_config.get('max_switches_per_hour', 3)  # Configurable
         
         # State tracking
         self.current_strategy = None
@@ -233,7 +234,7 @@ class AutoStrategyManager:
         # Check 6: Excessive switching protection
         if self._is_excessive_switching():
             logger.warning(
-                "Excessive switching detected (>3 switches in 1 hour). "
+                f"Excessive switching detected (>{self.max_switches_per_hour} switches in 1 hour). "
                 "Switching to 'combined' strategy and pausing auto-switching."
             )
             # Force switch to combined strategy
@@ -337,9 +338,9 @@ class AutoStrategyManager:
         Check if there have been too many switches recently.
         
         Returns:
-            True if more than 3 switches in the last hour
+            True if more than max_switches_per_hour switches in the last hour
         """
-        if len(self.switch_history) < 3:
+        if len(self.switch_history) < self.max_switches_per_hour:
             return False
         
         one_hour_ago = datetime.now() - timedelta(hours=1)
@@ -348,7 +349,7 @@ class AutoStrategyManager:
             if datetime.fromisoformat(s['timestamp']) > one_hour_ago
         ]
         
-        return len(recent_switches) >= 3
+        return len(recent_switches) >= self.max_switches_per_hour
     
     def _log_market_analysis(self, condition: MarketCondition):
         """Log market analysis results."""
