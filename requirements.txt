@@ -1,0 +1,10 @@
+# Core dependencies
+numpy>=1.24.0
+pandas>=2.0.0
+pyyaml>=6.0
+
+# Technical analysis
+pandas-ta>=0.3.14b0
+
+# Utilities
+python-dateutil>=2.8.2
