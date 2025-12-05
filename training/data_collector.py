@@ -180,6 +180,9 @@ class DataCollector:
                     try:
                         # Fetch more data for sliding window
                         # Calculate how many candles we need
+                        # Note: This is a rough estimate assuming equal distribution across
+                        # all symbol/timeframe combinations. Actual collection may vary
+                        # based on available data and API limits.
                         candles_needed = window_size + (target_count // (len(symbols) * len(timeframes)))
                         
                         logger.info(f"  Fetching {symbol} ({timeframe})...")

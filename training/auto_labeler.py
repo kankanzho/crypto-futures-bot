@@ -120,6 +120,14 @@ class AutoLabeler:
         height, width = image.shape[:2]
         
         # ⚠️  RANDOM LABELING - NOT REAL PATTERN DETECTION
+        # TODO: Replace this with real pattern detection algorithms such as:
+        #   1. Technical indicator-based detection (RSI, MACD, Bollinger Bands)
+        #   2. Peak/trough detection for double tops/bottoms
+        #   3. Trendline analysis for triangles and flags
+        #   4. Candlestick pattern recognition for engulfing patterns
+        #   5. Template matching or feature extraction
+        # For now, this generates random labels for pipeline demonstration only.
+        
         # Decide if pattern exists (demo logic)
         if random.random() < pattern_probability:
             # Randomly select 1-2 patterns
