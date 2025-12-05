@@ -10,7 +10,6 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
-import time
 import random
 import numpy as np
 
@@ -489,7 +488,6 @@ with tab4:
         if st.button("🚀 백테스트 실행", disabled=st.session_state.backtest_running):
             st.session_state.backtest_running = True
             st.success("백테스트가 시작되었습니다!")
-            time.sleep(1)
             st.session_state.backtest_running = False
             st.rerun()
     
@@ -530,11 +528,11 @@ with tab4:
     st.subheader("📈 수익률 곡선")
     
     # 샘플 수익률 데이터 생성
-    days = (end_date - start_date).days
-    dates = pd.date_range(start=start_date, end=end_date, periods=days)
+    days = max((end_date - start_date).days, 1)
+    dates = pd.date_range(start=start_date, end=end_date, periods=max(days, 2))
     equity = [initial_capital]
     
-    for i in range(1, days):
+    for i in range(1, len(dates)):
         change = equity[-1] * random.uniform(-0.02, 0.03)
         equity.append(equity[-1] + change)
     
