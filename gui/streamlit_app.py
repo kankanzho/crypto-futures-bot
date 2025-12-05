@@ -97,16 +97,23 @@ def get_recent_trades():
 
 def create_candlestick_chart():
     """BTC/USDT 캔들스틱 차트 생성"""
+    # 차트 설정 상수
+    CANDLE_COUNT = 50
+    BASE_PRICE = 43850
+    PRICE_RANGE = 200
+    CANDLE_RANGE = 150
+    WICK_RANGE = 100
+    
     # 예시 캔들스틱 데이터
-    dates = pd.date_range(end=datetime.now(), periods=50, freq='15min')
-    base_price = 43850
+    dates = pd.date_range(end=datetime.now(), periods=CANDLE_COUNT, freq='15min')
     
     data = []
+    base_price = BASE_PRICE
     for i, date in enumerate(dates):
-        open_price = base_price + random.uniform(-200, 200)
-        close_price = open_price + random.uniform(-150, 150)
-        high_price = max(open_price, close_price) + random.uniform(0, 100)
-        low_price = min(open_price, close_price) - random.uniform(0, 100)
+        open_price = base_price + random.uniform(-PRICE_RANGE, PRICE_RANGE)
+        close_price = open_price + random.uniform(-CANDLE_RANGE, CANDLE_RANGE)
+        high_price = max(open_price, close_price) + random.uniform(0, WICK_RANGE)
+        low_price = min(open_price, close_price) - random.uniform(0, WICK_RANGE)
         
         data.append({
             'date': date,
@@ -140,8 +147,12 @@ def create_candlestick_chart():
 
 def create_coin_chart(symbol, base_price):
     """코인별 미니 차트 생성"""
-    dates = pd.date_range(end=datetime.now(), periods=30, freq='5min')
-    prices = [base_price + random.uniform(-base_price*0.02, base_price*0.02) for _ in range(30)]
+    CHART_PERIODS = 30
+    PRICE_VOLATILITY = 0.02  # 2% volatility
+    
+    dates = pd.date_range(end=datetime.now(), periods=CHART_PERIODS, freq='5min')
+    prices = [base_price + random.uniform(-base_price * PRICE_VOLATILITY, base_price * PRICE_VOLATILITY) 
+              for _ in range(CHART_PERIODS)]
     
     fig = go.Figure()
     fig.add_trace(go.Scatter(
@@ -549,7 +560,8 @@ with tab4:
     st.subheader("월별 수익률")
     st.plotly_chart(create_monthly_returns(), use_container_width=True)
 
-# 자동 새로고침
+# 자동 새로고침 (5초마다)
 if st.session_state.auto_refresh:
+    import time
     time.sleep(5)
     st.rerun()

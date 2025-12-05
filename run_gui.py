@@ -27,16 +27,34 @@ def main():
     print("=" * 60)
     print()
     
+    # Streamlit 설치 확인
+    try:
+        import streamlit
+    except ImportError:
+        print("❌ 오류: Streamlit이 설치되지 않았습니다.")
+        print("❌ Error: Streamlit is not installed.")
+        print()
+        print("설치 방법: pip install streamlit plotly")
+        print("Install: pip install streamlit plotly")
+        return
+    
     # GUI 디렉토리로 이동
     gui_path = os.path.join(os.path.dirname(__file__), "gui", "streamlit_app.py")
     
     # Streamlit 실행
-    subprocess.run([
-        sys.executable, "-m", "streamlit", "run",
-        gui_path,
-        "--server.port=8501",
-        "--server.address=localhost"
-    ])
+    try:
+        subprocess.run([
+            sys.executable, "-m", "streamlit", "run",
+            gui_path,
+            "--server.port=8501",
+            "--server.address=localhost"
+        ], check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Streamlit 실행 중 오류 발생: {e}")
+        print(f"❌ Error running Streamlit: {e}")
+    except KeyboardInterrupt:
+        print("\n\n종료됨")
+        print("Stopped")
 
 if __name__ == "__main__":
     main()
