@@ -39,7 +39,8 @@ class Backtester:
         start_date: str,
         end_date: str,
         initial_capital: float = 10000.0,
-        symbol: str = 'BTC/USDT:USDT'
+        symbol: str = 'BTC/USDT:USDT',
+        leverage: int = 3
     ):
         """
         Initialize backtester
@@ -50,6 +51,7 @@ class Backtester:
             end_date: End date in YYYY-MM-DD format
             initial_capital: Initial capital in USDT
             symbol: Trading symbol
+            leverage: Trading leverage
         """
         load_dotenv()
         
@@ -58,6 +60,7 @@ class Backtester:
         self.initial_capital = initial_capital
         self.current_capital = initial_capital
         self.symbol = symbol
+        self.leverage = leverage
         
         # Trading records / 거래 기록
         self.trades: List[Dict] = []
@@ -210,9 +213,12 @@ class Backtester:
             Trade result dictionary
         """
         try:
-            # Calculate position size in base currency
-            # 기본 통화로 포지션 크기 계산
-            position_size = position_size_usdt / entry_price
+            # Calculate position size with leverage
+            # 레버리지를 적용한 포지션 크기 계산
+            # position_size_usdt = margin/collateral used
+            # notional_value = total position value with leverage
+            notional_value = position_size_usdt * self.leverage
+            position_size = notional_value / entry_price
             
             # Simulate price movement to find exit
             # 가격 움직임 시뮬레이션하여 청산 찾기
@@ -256,11 +262,15 @@ class Backtester:
                 exit_reason = 'end_of_backtest'
             
             # Calculate PnL / 손익 계산
+            # PnL is calculated on the full notional position size
+            # PnL 계산은 전체 명목 포지션 크기로 수행
             if side == 'long':
                 pnl = (exit_price - entry_price) * position_size
             else:  # short
                 pnl = (entry_price - exit_price) * position_size
             
+            # PnL percentage is relative to margin (position_size_usdt), not notional
+            # PnL 퍼센트는 명목가가 아닌 마진(position_size_usdt)에 상대적
             pnl_percent = (pnl / position_size_usdt) * 100
             
             trade_result = {
@@ -629,6 +639,7 @@ class Backtester:
                 f.write(f"- **Main Timeframe:** {self.bot.main_timeframe}\n")
                 f.write(f"- **Trend Timeframe:** {self.bot.trend_timeframe}\n")
                 f.write(f"- **Position Size:** ${self.bot.position_size_usdt} USDT\n")
+                f.write(f"- **Leverage:** {self.leverage}x\n")
                 f.write(f"- **ATR SL Multiplier:** {self.bot.atr_sl_multiplier}x\n")
                 f.write(f"- **ATR TP Multiplier:** {self.bot.atr_tp_multiplier}x\n")
                 f.write(f"- **YOLO Confidence:** {self.bot.yolo_confidence}\n\n")

@@ -65,6 +65,13 @@ def main():
     )
     
     parser.add_argument(
+        '--leverage',
+        type=int,
+        default=int(os.getenv('LEVERAGE', '3')),
+        help='Trading leverage (default: 3)'
+    )
+    
+    parser.add_argument(
         '--output-dir',
         type=str,
         default='backtest_results',
@@ -82,6 +89,7 @@ def main():
     logger.info(f"End Date: {args.end_date}")
     logger.info(f"Initial Capital: ${args.initial_capital:.2f} USDT")
     logger.info(f"Symbol: {args.symbol}")
+    logger.info(f"Leverage: {args.leverage}x")
     logger.info(f"Output Directory: {args.output_dir}")
     logger.info("=" * 80)
     
@@ -103,7 +111,8 @@ def main():
             start_date=args.start_date,
             end_date=args.end_date,
             initial_capital=args.initial_capital,
-            symbol=args.symbol
+            symbol=args.symbol,
+            leverage=args.leverage
         )
         
         # Run backtest / 백테스트 실행

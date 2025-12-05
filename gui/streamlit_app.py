@@ -181,7 +181,7 @@ with tab1:
     
     # 계좌 현황
     st.subheader("💰 계좌 현황")
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3, col4, col5 = st.columns(5)
     
     with col1:
         st.metric("잔고", "$10,245.32")
@@ -191,6 +191,8 @@ with tab1:
         st.metric("수익률", "+24.5%", "+2.1%")
     with col4:
         st.metric("포지션", "2개")
+    with col5:
+        st.metric("레버리지", "3x")
     
     st.markdown("---")
     
@@ -235,6 +237,28 @@ with tab1:
 # ==================== 탭 2: 실시간 거래 ====================
 with tab2:
     st.header("📈 실시간 거래 모니터링")
+    
+    # 거래 설정 섹션
+    st.subheader("⚙️ 거래 설정")
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        leverage = st.slider(
+            "레버리지",
+            min_value=1,
+            max_value=20,
+            value=3,
+            step=1,
+            help="1배 = 안전, 3배 = 균형, 5배+ = 위험"
+        )
+    
+    with col2:
+        st.metric("레버리지", f"{leverage}x")
+        risk_text = "안전" if leverage <= 2 else "균형" if leverage <= 5 else "위험"
+        risk_color = "🟢" if leverage <= 2 else "🟡" if leverage <= 5 else "🔴"
+        st.caption(f"{risk_color} 위험도: {risk_text}")
+    
+    st.markdown("---")
     
     # 3개 코인 동시 모니터링
     col1, col2, col3 = st.columns(3)
@@ -476,9 +500,13 @@ with tab4:
         )
     
     with col2:
-        leverage = st.selectbox(
+        backtest_leverage = st.slider(
             "레버리지",
-            ["1x", "2x", "5x", "10x", "20x"]
+            min_value=1,
+            max_value=20,
+            value=3,
+            step=1,
+            help="1배 = 안전, 3배 = 균형, 5배+ = 위험"
         )
     
     # 실행 버튼
@@ -488,6 +516,8 @@ with tab4:
         if st.button("🚀 백테스트 실행", disabled=st.session_state.backtest_running):
             st.session_state.backtest_running = True
             st.success("백테스트가 시작되었습니다!")
+            # Note: In production, backtest_leverage would be passed to the Backtester
+            # 프로덕션에서는 backtest_leverage가 Backtester에 전달됩니다
             st.session_state.backtest_running = False
             st.rerun()
     

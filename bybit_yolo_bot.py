@@ -57,6 +57,7 @@ class BybitYoloBot:
         self.funding_rate_threshold = float(os.getenv('FUNDING_RATE_THRESHOLD', '0.0003'))
         self.main_timeframe = os.getenv('MAIN_TIMEFRAME', '15m')
         self.trend_timeframe = os.getenv('TREND_TIMEFRAME', '4h')
+        self.leverage = int(os.getenv('LEVERAGE', '3'))
         
         # Pattern definitions / 패턴 정의
         self.bullish_patterns = [
@@ -123,9 +124,32 @@ class BybitYoloBot:
             self.exchange.load_markets()
             logger.info("Bybit API initialized successfully")
             
+            # Set leverage for the trading symbol
+            # 트레이딩 심볼의 레버리지 설정
+            self._set_leverage()
+            
         except Exception as e:
             logger.error(f"Failed to initialize Bybit API: {e}")
             raise
+    
+    def _set_leverage(self):
+        """
+        Set leverage for the trading symbol
+        트레이딩 심볼의 레버리지 설정
+        """
+        try:
+            self.exchange.set_leverage(
+                leverage=self.leverage,
+                symbol=self.symbol
+            )
+            logger.info(f"Leverage set to {self.leverage}x for {self.symbol}")
+            
+        except (ccxt.BaseError, ccxt.NetworkError, ccxt.ExchangeError) as e:
+            logger.warning(f"Failed to set leverage: {e}")
+            logger.warning("Using account default leverage setting")
+        except Exception as e:
+            logger.warning(f"Unexpected error setting leverage: {e}")
+            logger.warning("Using account default leverage setting")
     
     def fetch_ohlcv_multi_timeframe(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """
