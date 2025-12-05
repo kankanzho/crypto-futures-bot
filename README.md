@@ -83,6 +83,50 @@ mkdir -p models
 
 If no custom model is found, the bot will use the YOLOv8n pretrained model.
 
+## 🖥️ GUI 사용법
+
+### GUI 실행
+
+```bash
+python run_gui.py
+```
+
+브라우저에서 `http://localhost:8501` 자동 오픈
+
+### 주요 기능
+
+#### 📊 대시보드
+- 봇 제어 (시작/중지/긴급청산)
+- 실시간 계좌 현황
+- 활성 포지션 모니터링
+- 최근 거래 내역
+
+#### 📈 실시간 거래
+- BTC/ETH/SOL 동시 모니터링
+- 실시간 차트 및 지표
+- 패턴 탐지 알림
+- 수동 거래
+
+#### 🎓 YOLO 학습
+- RTX 3050 최적화 학습
+- GPU 실시간 모니터링
+- 학습 진행률 추적
+- 성과 지표 시각화
+
+#### 📉 백테스트
+- 전략 성과 분석
+- 수익률 곡선
+- 월별 성과
+
+### 모바일 접속
+
+같은 네트워크에서:
+```
+http://[컴퓨터IP]:8501
+```
+
+예: `http://192.168.0.100:8501`
+
 ## 💡 Usage
 
 ### Basic Usage
