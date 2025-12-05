@@ -157,6 +157,10 @@ class DatasetPreparer:
         Returns:
             Number of files copied
         """
+        # Ensure target directories exist
+        os.makedirs(target_images_dir, exist_ok=True)
+        os.makedirs(target_labels_dir, exist_ok=True)
+        
         copied = 0
         
         for image_file in files:

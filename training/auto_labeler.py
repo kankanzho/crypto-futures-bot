@@ -72,10 +72,34 @@ class AutoLabeler:
         Generate YOLO format labels for an image
         이미지에 대한 YOLO 형식 라벨 생성
         
-        This is a rule-based demo labeler. In production, you would use
-        actual pattern detection algorithms or manual labeling.
-        이것은 규칙 기반 데모 라벨러입니다. 실제로는 진짜 패턴 탐지
-        알고리즘이나 수동 라벨링을 사용해야 합니다.
+        ⚠️  WARNING: This is a DEMO labeler that generates RANDOM patterns!
+        ⚠️  경고: 이것은 랜덤 패턴을 생성하는 데모 라벨러입니다!
+        
+        This rule-based labeler creates completely random pattern labels
+        without any actual chart analysis. It is designed ONLY for:
+        - Testing the training pipeline
+        - Demonstrating the workflow
+        - Educational purposes
+        
+        For PRODUCTION use, you MUST:
+        - Implement real pattern detection algorithms, OR
+        - Use manual labeling by experts, OR
+        - Collect pre-labeled datasets
+        
+        Models trained with random labels will NOT detect real patterns!
+        
+        이 규칙 기반 라벨러는 실제 차트 분석 없이 완전히 랜덤한 패턴
+        라벨을 생성합니다. 오직 다음 용도로만 설계되었습니다:
+        - 학습 파이프라인 테스트
+        - 워크플로우 시연
+        - 교육 목적
+        
+        프로덕션 사용을 위해서는 반드시:
+        - 실제 패턴 탐지 알고리즘 구현, 또는
+        - 전문가에 의한 수동 라벨링, 또는
+        - 사전 라벨링된 데이터셋 수집
+        
+        랜덤 라벨로 학습된 모델은 실제 패턴을 탐지하지 못합니다!
         
         Args:
             image_path: Path to image file
@@ -95,6 +119,7 @@ class AutoLabeler:
         
         height, width = image.shape[:2]
         
+        # ⚠️  RANDOM LABELING - NOT REAL PATTERN DETECTION
         # Decide if pattern exists (demo logic)
         if random.random() < pattern_probability:
             # Randomly select 1-2 patterns

@@ -88,7 +88,8 @@ class YoloTrainer:
         pretrained: bool = True,
         amp: bool = True,
         cache: bool = True,
-        workers: int = 8
+        workers: int = 8,
+        save_period: int = -1
     ) -> Optional[str]:
         """
         Train YOLO model with RTX 3050 optimized settings
@@ -106,6 +107,7 @@ class YoloTrainer:
             amp: Use Automatic Mixed Precision (Tensor Cores)
             cache: Cache images in RAM (recommended with 16GB RAM)
             workers: Number of worker threads (8 for Ryzen 7)
+            save_period: Save checkpoint every N epochs (-1 to disable, recommended: 25-50 for production)
         
         Returns:
             Path to best model weights or None if failed
@@ -141,7 +143,7 @@ class YoloTrainer:
                 verbose=True,
                 plots=True,
                 save=True,
-                save_period=10  # Save checkpoint every 10 epochs
+                save_period=save_period  # Configurable checkpoint saving
             )
             
             # Get path to best weights

@@ -11,9 +11,6 @@ import sys
 import logging
 from datetime import datetime
 
-# Add training directory to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'training'))
-
 from training.data_collector import DataCollector
 from training.auto_labeler import AutoLabeler
 from training.dataset_preparer import DatasetPreparer
