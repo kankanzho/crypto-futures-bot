@@ -42,8 +42,7 @@ class DataCollector:
         
         # Initialize exchange (no API key needed for public data)
         self.exchange = ccxt.bybit({
-            'enableRateLimit': True,
-            'options': {'defaultType': 'future'}
+            'enableRateLimit': True
         })
         
         logger.info(f"DataCollector initialized. Output: {output_dir}")
