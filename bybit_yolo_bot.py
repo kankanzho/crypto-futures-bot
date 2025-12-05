@@ -144,8 +144,11 @@ class BybitYoloBot:
             )
             logger.info(f"Leverage set to {self.leverage}x for {self.symbol}")
             
-        except Exception as e:
+        except (ccxt.BaseError, ccxt.NetworkError, ccxt.ExchangeError) as e:
             logger.warning(f"Failed to set leverage: {e}")
+            logger.warning("Using account default leverage setting")
+        except Exception as e:
+            logger.warning(f"Unexpected error setting leverage: {e}")
             logger.warning("Using account default leverage setting")
     
     def fetch_ohlcv_multi_timeframe(self) -> Tuple[pd.DataFrame, pd.DataFrame]:

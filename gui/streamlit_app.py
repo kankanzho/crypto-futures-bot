@@ -516,6 +516,8 @@ with tab4:
         if st.button("🚀 백테스트 실행", disabled=st.session_state.backtest_running):
             st.session_state.backtest_running = True
             st.success("백테스트가 시작되었습니다!")
+            # Note: In production, backtest_leverage would be passed to the Backtester
+            # 프로덕션에서는 backtest_leverage가 Backtester에 전달됩니다
             st.session_state.backtest_running = False
             st.rerun()
     
