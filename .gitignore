@@ -144,6 +144,18 @@ ENV/
 env.bak/
 venv.bak/
 
+# YOLO models
+models/*.pt
+models/*.onnx
+models/*.torchscript
+
+# Temporary chart images (if any)
+*.png
+*.jpg
+*.jpeg
+!docs/*.png
+!docs/*.jpg
+
 # Spyder project settings
 .spyderproject
 .spyproject
