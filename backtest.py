@@ -10,7 +10,7 @@ import os
 import json
 import logging
 from typing import Dict, List, Optional, Tuple
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import ccxt
 import numpy as np

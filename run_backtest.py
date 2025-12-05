@@ -10,7 +10,7 @@ import os
 import sys
 import argparse
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from dotenv import load_dotenv
 
 from backtest import Backtester
