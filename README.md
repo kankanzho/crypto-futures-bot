@@ -277,6 +277,7 @@ All of the following must be true:
 | `BYBIT_API_SECRET` | - | Your Bybit API secret (required) |
 | `SYMBOL` | BTC/USDT:USDT | Trading pair |
 | `POSITION_SIZE_USDT` | 50 | Position size in USDT |
+| `LEVERAGE` | 3 | Trading leverage (default: 3x) |
 | `ATR_SL_MULTIPLIER` | 2.0 | Stop loss ATR multiplier |
 | `ATR_TP_MULTIPLIER` | 4.0 | Take profit ATR multiplier |
 | `YOLO_CONFIDENCE_THRESHOLD` | 0.7 | Minimum confidence for pattern detection |

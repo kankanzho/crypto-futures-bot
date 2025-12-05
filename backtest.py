@@ -39,7 +39,8 @@ class Backtester:
         start_date: str,
         end_date: str,
         initial_capital: float = 10000.0,
-        symbol: str = 'BTC/USDT:USDT'
+        symbol: str = 'BTC/USDT:USDT',
+        leverage: int = 3
     ):
         """
         Initialize backtester
@@ -50,6 +51,7 @@ class Backtester:
             end_date: End date in YYYY-MM-DD format
             initial_capital: Initial capital in USDT
             symbol: Trading symbol
+            leverage: Trading leverage
         """
         load_dotenv()
         
@@ -58,6 +60,7 @@ class Backtester:
         self.initial_capital = initial_capital
         self.current_capital = initial_capital
         self.symbol = symbol
+        self.leverage = leverage
         
         # Trading records / 거래 기록
         self.trades: List[Dict] = []
@@ -210,9 +213,10 @@ class Backtester:
             Trade result dictionary
         """
         try:
-            # Calculate position size in base currency
-            # 기본 통화로 포지션 크기 계산
-            position_size = position_size_usdt / entry_price
+            # Calculate position size with leverage
+            # 레버리지를 적용한 포지션 크기 계산
+            effective_capital = position_size_usdt * self.leverage
+            position_size = effective_capital / entry_price
             
             # Simulate price movement to find exit
             # 가격 움직임 시뮬레이션하여 청산 찾기
@@ -629,6 +633,7 @@ class Backtester:
                 f.write(f"- **Main Timeframe:** {self.bot.main_timeframe}\n")
                 f.write(f"- **Trend Timeframe:** {self.bot.trend_timeframe}\n")
                 f.write(f"- **Position Size:** ${self.bot.position_size_usdt} USDT\n")
+                f.write(f"- **Leverage:** {self.leverage}x\n")
                 f.write(f"- **ATR SL Multiplier:** {self.bot.atr_sl_multiplier}x\n")
                 f.write(f"- **ATR TP Multiplier:** {self.bot.atr_tp_multiplier}x\n")
                 f.write(f"- **YOLO Confidence:** {self.bot.yolo_confidence}\n\n")
