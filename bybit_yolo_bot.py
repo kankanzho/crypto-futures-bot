@@ -537,9 +537,13 @@ class BybitYoloBot:
             # Find position for our symbol / 우리 심볼의 포지션 찾기
             for position in positions:
                 # Check if position has size (not zero) / 포지션 크기 확인 (0이 아닌지)
+                # Note: For some exchanges, contracts can be negative for short positions
+                # 일부 거래소에서는 숏 포지션의 contracts가 음수일 수 있음
                 contracts = float(position.get('contracts', 0))
                 
-                if contracts > 0:
+                # Check for both long and short positions (contracts != 0)
+                # 롱과 숏 포지션 모두 확인 (contracts != 0)
+                if contracts != 0:
                     # Active position found / 활성 포지션 발견
                     position_info = {
                         'symbol': position.get('symbol'),

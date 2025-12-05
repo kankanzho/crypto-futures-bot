@@ -306,15 +306,18 @@ class Backtester:
                 raise ValueError("Insufficient data for indicators (need at least 200 candles)")
             
             # Iterate through time periods / 시간대별 반복
-            current_position = None
+            # Track the last exit time to prevent immediate re-entry
+            # 마지막 청산 시간을 추적하여 즉시 재진입 방지
+            last_exit_index = -1
             
             # Start from index 200 to have enough data for indicators
             # 지표 계산을 위해 인덱스 200부터 시작
             for i in range(200, len(main_df)):
                 current_time = main_df.index[i]
                 
-                # Skip if we have an open position / 열린 포지션 있으면 건너뛰기
-                if current_position is not None:
+                # Skip if we just exited a trade (prevent immediate re-entry)
+                # 거래를 막 청산한 경우 건너뛰기 (즉시 재진입 방지)
+                if i <= last_exit_index:
                     continue
                 
                 # Get data up to current point / 현재 시점까지 데이터 가져오기
@@ -388,8 +391,10 @@ class Backtester:
                         logger.info(f"PnL: ${trade_result['pnl']:.2f} ({trade_result['pnl_percent']:.2f}%)")
                         logger.info(f"Capital: ${self.current_capital:.2f}")
                         
-                        # Mark position as closed / 포지션 닫힘으로 표시
-                        current_position = None
+                        # Update last exit index to prevent immediate re-entry
+                        # 즉시 재진입 방지를 위해 마지막 청산 인덱스 업데이트
+                        exit_idx = main_df.index.get_loc(trade_result['exit_time'])
+                        last_exit_index = exit_idx
                 
                 else:
                     # Check short conditions / 숏 조건 확인
@@ -427,8 +432,10 @@ class Backtester:
                             logger.info(f"PnL: ${trade_result['pnl']:.2f} ({trade_result['pnl_percent']:.2f}%)")
                             logger.info(f"Capital: ${self.current_capital:.2f}")
                             
-                            # Mark position as closed / 포지션 닫힘으로 표시
-                            current_position = None
+                            # Update last exit index to prevent immediate re-entry
+                            # 즉시 재진입 방지를 위해 마지막 청산 인덱스 업데이트
+                            exit_idx = main_df.index.get_loc(trade_result['exit_time'])
+                            last_exit_index = exit_idx
                 
                 # Record equity / 자산 기록
                 self.equity_curve.append({
