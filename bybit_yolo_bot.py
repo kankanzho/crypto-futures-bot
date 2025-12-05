@@ -22,6 +22,7 @@ import pandas as pd
 import cv2
 from PIL import Image
 import mplfinance as mpf
+import matplotlib.pyplot as plt
 from ultralytics import YOLO
 from dotenv import load_dotenv
 
@@ -301,7 +302,6 @@ class BybitYoloBot:
             opencv_image = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
             
             # Close figure to free memory / 메모리 해제를 위해 그림 닫기
-            import matplotlib.pyplot as plt
             plt.close(fig)
             
             logger.info(f"Generated chart image with shape: {opencv_image.shape}")
@@ -456,6 +456,10 @@ class BybitYoloBot:
             Position size in base currency units
         """
         try:
+            # Validate price is positive / 가격이 양수인지 검증
+            if price <= 0:
+                raise ValueError(f"Invalid price: {price}. Price must be positive.")
+            
             # Position size = USDT amount / Price
             # 포지션 크기 = USDT 금액 / 가격
             position_size = self.position_size_usdt / price
