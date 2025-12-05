@@ -520,6 +520,190 @@ class BybitYoloBot:
             logger.error(f"Failed to calculate SL/TP: {e}")
             raise
     
+    def has_open_position(self) -> Tuple[bool, Optional[Dict]]:
+        """
+        Check if there is an active position for the symbol
+        해당 심볼의 활성 포지션이 있는지 확인
+        
+        Returns:
+            Tuple of (has_position, position_info)
+            - has_position: True if active position exists
+            - position_info: Position details or None
+        """
+        try:
+            # Fetch all positions / 모든 포지션 가져오기
+            positions = self.exchange.fetch_positions([self.symbol])
+            
+            # Find position for our symbol / 우리 심볼의 포지션 찾기
+            for position in positions:
+                # Check if position has size (not zero) / 포지션 크기 확인 (0이 아닌지)
+                contracts = float(position.get('contracts', 0))
+                
+                if contracts > 0:
+                    # Active position found / 활성 포지션 발견
+                    position_info = {
+                        'symbol': position.get('symbol'),
+                        'side': position.get('side'),  # 'long' or 'short'
+                        'contracts': contracts,
+                        'entry_price': float(position.get('entryPrice', 0)),
+                        'unrealized_pnl': float(position.get('unrealizedPnl', 0)),
+                        'percentage': float(position.get('percentage', 0)),
+                        'leverage': float(position.get('leverage', 1)),
+                        'liquidation_price': position.get('liquidationPrice'),
+                        'margin_type': position.get('marginMode', 'cross'),
+                    }
+                    
+                    logger.info(f"Active position found: {position_info['side']} "
+                               f"{position_info['contracts']} contracts at "
+                               f"${position_info['entry_price']:.2f}")
+                    
+                    return True, position_info
+            
+            # No active position / 활성 포지션 없음
+            return False, None
+            
+        except Exception as e:
+            logger.error(f"Failed to check position: {e}")
+            # Return False on error to be safe / 에러 시 안전하게 False 반환
+            return False, None
+    
+    def get_position_info(self) -> Optional[Dict]:
+        """
+        Get detailed information about current position
+        현재 포지션의 상세 정보 조회
+        
+        Returns:
+            Dictionary with position details or None if no position
+        """
+        try:
+            has_position, position_info = self.has_open_position()
+            
+            if not has_position:
+                logger.info("No active position")
+                return None
+            
+            # Get current market price for PnL calculation
+            # PnL 계산을 위한 현재 시장 가격 가져오기
+            ticker = self.exchange.fetch_ticker(self.symbol)
+            current_price = float(ticker['last'])
+            
+            # Add current price and calculate additional metrics
+            # 현재 가격 추가 및 추가 지표 계산
+            position_info['current_price'] = current_price
+            
+            # Calculate PnL percentage if not already provided
+            # PnL 퍼센트 계산 (제공되지 않은 경우)
+            if position_info['entry_price'] > 0:
+                if position_info['side'] == 'long':
+                    pnl_percent = ((current_price - position_info['entry_price']) / 
+                                  position_info['entry_price']) * 100
+                else:  # short
+                    pnl_percent = ((position_info['entry_price'] - current_price) / 
+                                  position_info['entry_price']) * 100
+                
+                position_info['pnl_percent_calculated'] = pnl_percent
+            
+            return position_info
+            
+        except Exception as e:
+            logger.error(f"Failed to get position info: {e}")
+            return None
+    
+    def monitor_position(self):
+        """
+        Monitor and log active position status
+        활성 포지션 모니터링 및 로깅
+        """
+        try:
+            position_info = self.get_position_info()
+            
+            if not position_info:
+                logger.info("No position to monitor")
+                return
+            
+            # Log position details / 포지션 세부사항 로깅
+            logger.info("=" * 60)
+            logger.info("📊 POSITION STATUS / 포지션 상태")
+            logger.info("=" * 60)
+            logger.info(f"Symbol: {position_info['symbol']}")
+            logger.info(f"Side: {position_info['side'].upper()}")
+            logger.info(f"Size: {position_info['contracts']} contracts")
+            logger.info(f"Entry Price: ${position_info['entry_price']:.2f}")
+            logger.info(f"Current Price: ${position_info['current_price']:.2f}")
+            logger.info(f"Unrealized PnL: ${position_info['unrealized_pnl']:.2f}")
+            
+            if 'pnl_percent_calculated' in position_info:
+                pnl_pct = position_info['pnl_percent_calculated']
+                emoji = "🟢" if pnl_pct > 0 else "🔴" if pnl_pct < 0 else "⚪"
+                logger.info(f"PnL Percentage: {emoji} {pnl_pct:.2f}%")
+            
+            logger.info(f"Leverage: {position_info['leverage']}x")
+            
+            if position_info['liquidation_price']:
+                logger.info(f"Liquidation Price: ${position_info['liquidation_price']:.2f}")
+            
+            logger.info("=" * 60)
+            
+            # Risk alerts / 리스크 알림
+            if 'pnl_percent_calculated' in position_info:
+                pnl_pct = position_info['pnl_percent_calculated']
+                
+                if pnl_pct < -10:
+                    logger.warning("⚠️  WARNING: Position is down more than 10%!")
+                elif pnl_pct < -5:
+                    logger.warning("⚠️  CAUTION: Position is down more than 5%")
+                elif pnl_pct > 10:
+                    logger.info("💰 Position is up more than 10% - consider taking profits")
+            
+        except Exception as e:
+            logger.error(f"Failed to monitor position: {e}")
+    
+    def close_position_manually(self, reason: str = "Manual close"):
+        """
+        Manually close the current position
+        수동으로 현재 포지션 청산
+        
+        Args:
+            reason: Reason for closing the position
+        """
+        try:
+            has_position, position_info = self.has_open_position()
+            
+            if not has_position:
+                logger.info("No active position to close")
+                return
+            
+            logger.info(f"Closing position: {reason}")
+            logger.info(f"Position: {position_info['side']} {position_info['contracts']} contracts")
+            
+            # Determine the opposite side to close position
+            # 포지션 청산을 위한 반대 방향 결정
+            close_side = 'sell' if position_info['side'] == 'long' else 'buy'
+            
+            # Create market order to close position
+            # 포지션 청산을 위한 시장가 주문 생성
+            order = self.exchange.create_order(
+                symbol=self.symbol,
+                type='market',
+                side=close_side,
+                amount=position_info['contracts'],
+                params={'reduceOnly': True}  # Ensure it only closes, not opens new position
+            )
+            
+            logger.info(f"✅ Position closed successfully!")
+            logger.info(f"Close order ID: {order.get('id')}")
+            logger.info(f"Reason: {reason}")
+            
+            # Log final PnL if available / 최종 PnL 로깅 (가능한 경우)
+            if position_info.get('unrealized_pnl'):
+                logger.info(f"Final PnL: ${position_info['unrealized_pnl']:.2f}")
+            
+            return order
+            
+        except Exception as e:
+            logger.error(f"Failed to close position: {e}")
+            return None
+    
     def execute_trade(
         self,
         side: str,
@@ -573,8 +757,8 @@ class BybitYoloBot:
     
     def run(self):
         """
-        Main bot loop
-        메인 봇 루프
+        Main bot loop with position management
+        포지션 관리를 포함한 메인 봇 루프
         """
         logger.info("=" * 80)
         logger.info("Starting Hybrid Crypto Futures Trading Bot")
@@ -583,6 +767,10 @@ class BybitYoloBot:
         
         iteration = 0
         
+        # Get position check interval from environment or use default
+        # 환경 변수에서 포지션 확인 간격 가져오기 또는 기본값 사용
+        position_check_interval = int(os.getenv('POSITION_CHECK_INTERVAL', '30'))
+        
         while True:
             try:
                 iteration += 1
@@ -590,28 +778,46 @@ class BybitYoloBot:
                 logger.info(f"Iteration {iteration} - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
                 logger.info(f"{'='*80}")
                 
-                # Step 1: Fetch multi-timeframe OHLCV data
-                # 단계 1: 다중 타임프레임 OHLCV 데이터 가져오기
+                # Step 1: Check for existing position
+                # 단계 1: 기존 포지션 확인
+                has_position, position_info = self.has_open_position()
+                
+                if has_position:
+                    # Position exists - monitor only, skip new entries
+                    # 포지션 존재 - 모니터링만 하고 새 진입 건너뛰기
+                    logger.info("⏸️  Active position exists, skipping new entry evaluation")
+                    self.monitor_position()
+                    
+                    logger.info(f"\n💤 Sleeping for {position_check_interval} seconds...")
+                    time.sleep(position_check_interval)
+                    continue
+                
+                # Step 2: No position - proceed with entry evaluation
+                # 단계 2: 포지션 없음 - 진입 조건 평가 진행
+                logger.info("✅ No active position - evaluating entry conditions")
+                
+                # Step 3: Fetch multi-timeframe OHLCV data
+                # 단계 3: 다중 타임프레임 OHLCV 데이터 가져오기
                 main_df, trend_df = self.fetch_ohlcv_multi_timeframe()
                 
-                # Step 2: Calculate indicators
-                # 단계 2: 지표 계산
+                # Step 4: Calculate indicators
+                # 단계 4: 지표 계산
                 indicators = self.calculate_indicators(main_df, trend_df)
                 
-                # Step 3: Fetch funding rate
-                # 단계 3: 펀딩 비율 가져오기
+                # Step 5: Fetch funding rate
+                # 단계 5: 펀딩 비율 가져오기
                 funding_rate = self.fetch_funding_rate()
                 
-                # Step 4: Generate chart image (in-memory)
-                # 단계 4: 차트 이미지 생성 (메모리 내)
+                # Step 6: Generate chart image (in-memory)
+                # 단계 6: 차트 이미지 생성 (메모리 내)
                 chart_image = self.generate_chart_image(main_df)
                 
-                # Step 5: Detect patterns with YOLO
-                # 단계 5: YOLO로 패턴 탐지
+                # Step 7: Detect patterns with YOLO
+                # 단계 7: YOLO로 패턴 탐지
                 patterns = self.detect_pattern(chart_image)
                 
-                # Step 6: Evaluate trading conditions
-                # 단계 6: 거래 조건 평가
+                # Step 8: Evaluate trading conditions
+                # 단계 8: 거래 조건 평가
                 
                 # Check long conditions / 롱 조건 확인
                 should_long, long_reason = self.check_long_conditions(
@@ -663,8 +869,8 @@ class BybitYoloBot:
                         logger.info(f"Long: {long_reason}")
                         logger.info(f"Short: {short_reason}")
                 
-                # Step 7: Wait before next iteration
-                # 단계 7: 다음 반복 전 대기
+                # Step 9: Wait before next iteration
+                # 단계 9: 다음 반복 전 대기
                 sleep_time = 60
                 logger.info(f"\n💤 Sleeping for {sleep_time} seconds...")
                 time.sleep(sleep_time)

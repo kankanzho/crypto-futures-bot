@@ -156,6 +156,9 @@ models/*.torchscript
 !docs/*.png
 !docs/*.jpg
 
+# Backtest results
+backtest_results/
+
 # Spyder project settings
 .spyderproject
 .spyproject

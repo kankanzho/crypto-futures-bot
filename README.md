@@ -249,14 +249,187 @@ You can adjust the strategy by modifying the configuration:
 - **Higher Targets**: Increase `ATR_TP_MULTIPLIER` to 5.0 or 6.0
 - **Different Timeframes**: Change to 5m/1h or 1h/1d combinations
 
+## 📊 Backtesting
+
+### Overview
+The bot includes a comprehensive backtesting module to test your strategy on historical data before risking real capital.
+
+### Running a Backtest
+
+#### Basic Usage
+```bash
+python run_backtest.py
+```
+
+This will use the default settings from `.env`:
+- Start Date: 2024-01-01
+- End Date: 2024-12-01
+- Initial Capital: $10,000 USDT
+
+#### Custom Parameters
+```bash
+python run_backtest.py \
+  --start-date 2024-06-01 \
+  --end-date 2024-11-01 \
+  --initial-capital 5000 \
+  --symbol BTC/USDT:USDT \
+  --output-dir my_backtest_results
+```
+
+### Backtest Configuration
+
+Add these settings to your `.env` file:
+
+```bash
+# Backtest Settings
+BACKTEST_START_DATE=2024-01-01
+BACKTEST_END_DATE=2024-12-01
+BACKTEST_INITIAL_CAPITAL=10000
+```
+
+### Performance Metrics
+
+The backtester calculates the following metrics:
+
+- **Total Return**: Absolute profit/loss in USDT and percentage
+- **Max Drawdown**: Largest peak-to-trough decline
+- **Sharpe Ratio**: Risk-adjusted return metric
+- **Win Rate**: Percentage of profitable trades
+- **Average Profit/Loss Ratio**: Average win size vs average loss size
+- **Total Trades**: Number of trades executed
+- **Winning/Losing Trades**: Breakdown of trade outcomes
+
+### Output Files
+
+After running a backtest, results are saved to the output directory:
+
+```
+backtest_results/
+├── trades_20241205_120000.csv      # Detailed trade history
+├── equity_20241205_120000.csv      # Equity curve over time
+├── metrics_20241205_120000.json    # Performance metrics
+└── report_20241205_120000.md       # Markdown summary report
+```
+
+### Example Output
+
+```
+================================================================================
+BACKTEST RESULTS
+백테스트 결과
+================================================================================
+Initial Capital: $10000.00 USDT
+Final Capital: $12450.00 USDT
+Total Return: $2450.00 (24.50%)
+--------------------------------------------------------------------------------
+Total Trades: 45
+Winning Trades: 28
+Losing Trades: 17
+Win Rate: 62.22%
+Average Trade PnL: $54.44
+Avg Profit/Loss Ratio: 1.85
+--------------------------------------------------------------------------------
+Max Drawdown: $850.00 (8.50%)
+Sharpe Ratio: 1.42
+================================================================================
+```
+
+### Interpreting Results
+
+- **Positive Sharpe Ratio (>1)**: Good risk-adjusted returns
+- **High Win Rate (>50%)**: Strategy has edge
+- **Low Max Drawdown (<20%)**: Good risk management
+- **Profit/Loss Ratio (>1)**: Winners larger than losers on average
+
+### Limitations
+
+⚠️ **Important Notes:**
+- Backtests assume perfect execution (no slippage)
+- Funding rates are set to 0 for simplification
+- YOLO pattern detection runs on historical data (computationally intensive)
+- Past performance does not guarantee future results
+
+## 🎯 Position Management
+
+### Automatic Position Checking
+
+The bot now automatically checks for open positions before entering new trades:
+
+```python
+# In the main loop
+has_position, position_info = self.has_open_position()
+
+if has_position:
+    # Monitor existing position, skip new entries
+    self.monitor_position()
+else:
+    # Evaluate entry conditions
+    ...
+```
+
+### Position Monitoring
+
+When an active position exists, the bot:
+- Logs detailed position information
+- Displays unrealized PnL
+- Shows risk metrics (leverage, liquidation price)
+- Provides alerts for significant drawdowns
+
+Example output:
+```
+============================================================
+📊 POSITION STATUS / 포지션 상태
+============================================================
+Symbol: BTC/USDT:USDT
+Side: LONG
+Size: 0.0012 contracts
+Entry Price: $42500.00
+Current Price: $43200.00
+Unrealized PnL: $8.40
+PnL Percentage: 🟢 1.65%
+Leverage: 10x
+Liquidation Price: $38250.00
+============================================================
+```
+
+### Manual Position Management
+
+You can manually close positions using the bot's API:
+
+```python
+from bybit_yolo_bot import BybitYoloBot
+
+bot = BybitYoloBot()
+
+# Close current position
+bot.close_position_manually(reason="Taking profits manually")
+
+# Check position status
+position_info = bot.get_position_info()
+if position_info:
+    print(f"Position: {position_info['side']} {position_info['contracts']} contracts")
+```
+
+### Configuration
+
+Set the position check interval in `.env`:
+
+```bash
+# Position Management
+MAX_CONCURRENT_POSITIONS=1
+POSITION_CHECK_INTERVAL=30  # Seconds between position checks
+```
+
 ## 🔒 Safety Features
 
-1. **Funding Rate Check**: Pauses trading if funding rate exceeds threshold
-2. **RSI Filter**: Prevents buying overbought or selling oversold
-3. **Trend Confirmation**: Requires 4H EMA 200 alignment
-4. **Dynamic Stop Loss**: ATR-based to adapt to volatility
-5. **Position Size Management**: Fixed USDT amount to control risk
-6. **API Rate Limiting**: Built-in rate limit handling with ccxt
+1. **Position Duplication Prevention**: Prevents entering multiple positions in the same direction
+2. **Funding Rate Check**: Pauses trading if funding rate exceeds threshold
+3. **RSI Filter**: Prevents buying overbought or selling oversold
+4. **Trend Confirmation**: Requires 4H EMA 200 alignment
+5. **Dynamic Stop Loss**: ATR-based to adapt to volatility
+6. **Position Size Management**: Fixed USDT amount to control risk
+7. **API Rate Limiting**: Built-in rate limit handling with ccxt
+8. **Position Monitoring**: Continuous monitoring of open positions with risk alerts
 
 ## ⚠️ Disclaimer
 
