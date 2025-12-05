@@ -215,8 +215,10 @@ class Backtester:
         try:
             # Calculate position size with leverage
             # 레버리지를 적용한 포지션 크기 계산
-            effective_capital = position_size_usdt * self.leverage
-            position_size = effective_capital / entry_price
+            # position_size_usdt = margin/collateral used
+            # notional_value = total position value with leverage
+            notional_value = position_size_usdt * self.leverage
+            position_size = notional_value / entry_price
             
             # Simulate price movement to find exit
             # 가격 움직임 시뮬레이션하여 청산 찾기
@@ -260,11 +262,15 @@ class Backtester:
                 exit_reason = 'end_of_backtest'
             
             # Calculate PnL / 손익 계산
+            # PnL is calculated on the full notional position size
+            # PnL 계산은 전체 명목 포지션 크기로 수행
             if side == 'long':
                 pnl = (exit_price - entry_price) * position_size
             else:  # short
                 pnl = (entry_price - exit_price) * position_size
             
+            # PnL percentage is relative to margin (position_size_usdt), not notional
+            # PnL 퍼센트는 명목가가 아닌 마진(position_size_usdt)에 상대적
             pnl_percent = (pnl / position_size_usdt) * 100
             
             trade_result = {
