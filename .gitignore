@@ -148,6 +148,8 @@ venv.bak/
 models/*.pt
 models/*.onnx
 models/*.torchscript
+*.pt
+*.onnx
 
 # Temporary chart images (if any)
 *.png
